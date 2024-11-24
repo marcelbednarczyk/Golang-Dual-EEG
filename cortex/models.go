@@ -30,18 +30,11 @@ type Request struct {
 	Params  interface{} `json:"params"`
 }
 
-type Response struct {
+type Response[T any] struct {
 	ID      int         `json:"id"`
 	JsonRPC string      `json:"jsonrpc"`
-	Result  interface{} `json:"result"`
+	Result  T           `json:"result"`
 	Error   interface{} `json:"error"`
-}
-
-type ResponseSlice struct {
-	ID      int           `json:"id"`
-	JsonRPC string        `json:"jsonrpc"`
-	Result  []interface{} `json:"result"`
-	Error   interface{}   `json:"error"`
 }
 
 type SetupProfileParams struct {

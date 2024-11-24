@@ -1,5 +1,10 @@
 package cortex
 
+type AccessResponse struct {
+	AccessGranted bool   `json:"accessGranted"`
+	Message       string `json:"message"`
+}
+
 func GetAccessRequest(clientId, clientSecret string) Request {
 	return Request{
 		ID:      1,
