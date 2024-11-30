@@ -1,46 +1,59 @@
 package cortex
 
 import (
+	"errors"
+
 	"golang.org/x/net/websocket"
 )
 
-func ConnectHeadset(ws *websocket.Conn, clientId, clientSecret string) error {
+func ConnectHeadset(ws *websocket.Conn, headsetName, clientId, clientSecret string) (string, string, error) {
 	if err := Send(ws, GetDefaultInfoRequest()); err != nil {
-		return err
+		return "", "", err
 	}
 	var defaultInfo Response[DefaultInfoResponse]
-	if err := websocket.JSON.Receive(ws, &defaultInfo); err != nil {
-		return err
+	if err := Receive(ws, &defaultInfo); err != nil {
+		return "", "", err
 	}
-	_ = defaultInfo
 
 	if err := Send(ws, GetAccessRequest(clientId, clientSecret)); err != nil {
-		return err
+		return "", "", err
 	}
 	var access Response[AccessResponse]
-	if err := websocket.JSON.Receive(ws, &access); err != nil {
-		return err
+	if err := Receive(ws, &access); err != nil {
+		return "", "", err
 	}
-	_ = access
 
 	if err := Send(ws, GetHeadsetsRequest()); err != nil {
-		return err
+		return "", "", err
 	}
 	var headsets Response[HeadsetsResponse]
-	if err := websocket.JSON.Receive(ws, &headsets); err != nil {
-		return err
+	if err := Receive(ws, &headsets); err != nil {
+		return "", "", err
 	}
+
+	if err := Send(ws, GetAuthorizeRequest(clientId, clientSecret)); err != nil {
+		return "", "", err
+	}
+	var authorize Response[AuthorizeResponse]
+	if err := Receive(ws, &authorize); err != nil {
+		return "", "", err
+	}
+	token := authorize.Result.CortexToken
 
 	for _, headset := range headsets.Result {
-		_ = headset
+		if headset.CustomName != headsetName {
+			continue
+		}
+		if err := Send(ws, GetConnectHeadsetRequest(headset.ID)); err != nil {
+			return "", "", err
+		}
+		var connectHeadset Response[ConnectHeadsetResponse]
+		if err := Receive(ws, &connectHeadset); err != nil {
+			return "", "", err
+		}
+		if isConnected(connectHeadset.Result) {
+			return token, headset.ID, nil
+		}
 	}
-
-	return nil
+	return token, "", errors.New(noHeadsetConnectedError)
 }
-
-// var x map[string]interface{}
-// if err := websocket.JSON.Receive(ws, &x); err != nil {
-// 	return err
-// }
-// jsonString, _ := json.Marshal(x)
-// fmt.Println(string(jsonString))

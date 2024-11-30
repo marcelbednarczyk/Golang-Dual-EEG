@@ -1,23 +1,20 @@
 package cortex
 
+import "strings"
+
 type HeadsetsResponse []HeadsetResponse
 
 type HeadsetResponse struct {
-	ConnectedBy      string        `json:"connectedBy"`
-	CustomName       string        `json:"customName"`
-	DfuTypes         []interface{} `json:"dfuTypes"`
-	Dongle           string        `json:"dongle"`
-	Firmware         string        `json:"firmware"`
-	FirmwareDisplay  string        `json:"firmwareDisplay"`
-	HeadbandPosition interface{}   `json:"headbandPosition"`
-	ID               string        `json:"id"`
-	IsDfuMode        bool          `json:"isDfuMode"`
-	IsVirtual        bool          `json:"isVirtual"`
-	MotionSensors    []string      `json:"motionSensors"`
-	Sensors          []string      `json:"sensors"`
-	Settings         Settings      `json:"settings"`
-	Status           string        `json:"status"`
-	VirtualHeadsetID string        `json:"virtualHeadsetId"`
+	ID               string   `json:"id"`
+	Status           string   `json:"status"`
+	ConnectedBy      string   `json:"connectedBy"`
+	Dongle           string   `json:"dongle"`
+	Firmware         string   `json:"firmware"`
+	MotionSensors    []string `json:"motionSensors"`
+	Sensors          []string `json:"sensors"`
+	Settings         Settings `json:"settings"`
+	HeadbandPosition string   `json:"headbandPosition"`
+	CustomName       string   `json:"customName"`
 }
 
 type Settings struct {
@@ -35,4 +32,41 @@ func GetHeadsetsRequest() Request {
 		Method:  "queryHeadsets",
 		Params:  nil,
 	}
+}
+
+const (
+	noHeadsetConnectedError = "no headset connected"
+	isConnectedString       = "has been connected or is connecting"
+)
+
+func isConnected(resp ConnectHeadsetResponse) bool {
+	if resp.Command != "connect" {
+		return false
+	}
+	if !strings.Contains(resp.Message, isConnectedString) {
+		return false
+	}
+	return true
+}
+
+func GetConnectHeadsetRequest(headsetID string) Request {
+	return Request{
+		ID:      4,
+		JsonRPC: "2.0",
+		Method:  "controlDevice",
+		Params: ControlDeviceParams{
+			Command: "connect",
+			Headset: headsetID,
+		},
+	}
+}
+
+type ControlDeviceParams struct {
+	Command string `json:"command"`
+	Headset string `json:"headset"`
+}
+
+type ConnectHeadsetResponse struct {
+	Command string `json:"command"`
+	Message string `json:"message"`
 }

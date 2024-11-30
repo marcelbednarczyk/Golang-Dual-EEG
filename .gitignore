@@ -26,3 +26,7 @@ go.work.sum
 
 # VS Code
 .vscode/
+
+*.csv
+
+Listen2.go

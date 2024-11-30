@@ -31,9 +31,16 @@ func main() {
 		return
 	}
 
-	err = cortex.ConnectHeadset(ws, os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"))
+	token, headsetId, err := cortex.ConnectHeadset(ws, os.Getenv("HEADSET_NAME"), os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"))
 	if err != nil {
 		slog.Error("Error connecting headset", slog.String("error", err.Error()))
 		return
 	}
+	slog.Info("Connected to headset", slog.String("headset", headsetId))
+
+	if err := cortex.Listen(ws, token, headsetId, os.Getenv("HEADSET_NAME")); err != nil {
+		slog.Error("Error subscribing to headset", slog.String("error", err.Error()))
+		return
+	}
+	slog.Info("Stopped")
 }
