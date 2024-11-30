@@ -27,6 +27,9 @@ go.work.sum
 # VS Code
 .vscode/
 
+# Spreadsheets
 *.csv
+*.xlsx
 
+# Temporary files
 Listen2.go
