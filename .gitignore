@@ -33,3 +33,6 @@ go.work.sum
 
 # Temporary files
 Listen2.go
+
+# macOS
+.DS_Store
