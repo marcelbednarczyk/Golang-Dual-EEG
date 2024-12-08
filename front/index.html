@@ -7,7 +7,7 @@
 }
 
 #myBar {
-  width: 10%;
+  width: 50%;
   height: 30px;
   background-color: #FF4949; 
   text-align: center;
@@ -24,32 +24,52 @@
 </div>
 
 <br>
-<button onclick="move(0)">0</button> 
-<button onclick="move(10)">10</button> 
-<button onclick="move(50)">50</button> 
-<button onclick="move(90)">90</button> 
-<button onclick="move(100)">100</button> 
+<button onclick="start()">Start</button> 
+<button onclick="stop()">Stop</button> 
 
 <script>
 var i = 0;
-var width = 10;
-function move(value) {
+var width = 50;
+var value = 0;
+var refreshIntervalId;
+var moveIntervalId;
+
+function start() {
+  refreshIntervalId = setInterval(refresh, 100);
+  moveIntervalId = setInterval(move, 100);
+}
+
+function stop() {
+  clearInterval(refreshIntervalId);
+  clearInterval(moveIntervalId);
+}
+
+function refresh() {
+  fetch('http://localhost:8080/api/dual-eeg/v1.0/score').then(response => response.json()).then(data => {
+    console.log(data.score);
+    value = data.score;
+  }).catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+function move() {
   if (i == 0) {
     i = 1;
     var elem = document.getElementById("myBar");
     if (width >= value) {
-      var id = setInterval(frameDown, 10);
-    function frameDown() {
-      if (width <= value) {
-        clearInterval(id);
-        i = 0;
-      } else {
-        width--;
-        elem.style.width = width + "%";
+      var id = setInterval(frameDown, 50);
+      function frameDown() {
+        if (width <= value) {
+          clearInterval(id);
+          i = 0;
+        } else {
+          width--;
+          elem.style.width = width + "%";
+        }
       }
-    }
     } else {
-    var id = setInterval(frame, 10);
+    var id = setInterval(frame, 50);
     function frame() {
       if (width >= value) {
         clearInterval(id);
