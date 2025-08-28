@@ -36,3 +36,4 @@ Listen2.go
 
 # macOS
 .DS_Store
+__debug_*
